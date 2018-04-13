@@ -1,7 +1,7 @@
 function doPost(e){
   //<商品名>　<価格> <在庫> <image url>
   var input = (e.parameter.text).split(" ");
-  sendMsgWithButton(input[0],input[1],input[2],input[3]);
+  sendMsgWithButton(input[0],input[1],input[2]);
     
   var res = {
     "text": "商品を追加に成功いたしました."
@@ -10,7 +10,7 @@ function doPost(e){
   return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
 }
 
-function sendMsgWithButton(name,price,num,url) {
+function sendMsgWithButton(name,price,url) {
   // slack channel url (where to send the message)
   var slackUrl = "https://hooks.slack.com/services/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";
   
@@ -19,7 +19,7 @@ function sendMsgWithButton(name,price,num,url) {
         "attachments": [
           {
             "title": name,
-            "text":"在庫: "+num,
+            //"text":"在庫: "+num,
             "fallback": "Sorry, no support for buttons.",
             "callback_id": "ButtonResponse",
             "color": "#3AA3E3",
