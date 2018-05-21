@@ -1,3 +1,6 @@
+//Project properties
+//SLACK_INCOMMING_URL: your slack incomming webhook's url
+
 function doPost(e){
   //<商品名>　<価格> <image url>
   var input = (e.parameter.text).split(" ");
@@ -12,7 +15,7 @@ function doPost(e){
 
 function sendMsgWithButton(name,price,url) {
   // slack channel url (where to send the message)
-  var slackUrl = "https://hooks.slack.com/services/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";
+  var slackUrl = PropertiesService.getScriptProperties().getProperty('SLACK_INCOMMING_URL');
   
   // message text  
       var messageData = {
@@ -31,7 +34,7 @@ function sendMsgWithButton(name,price,url) {
                     "type": "button",
                     "value": price
               }
-              /** キャンセルボタンなんて要らないよなぁ？
+              /**キャンセルボタンなんていりませんよね？
               ,{
                     "name": "cancel",
                     "text": "キャンセル",
