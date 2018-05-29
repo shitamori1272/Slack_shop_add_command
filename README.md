@@ -11,7 +11,7 @@
 <img src="https://user-images.githubusercontent.com/19219101/40663000-bdd96f96-6392-11e8-9a03-2f5b4a9de618.PNG" width="500">
 
 3. 上記コードをwebに公開し、slackのslachコマンド機能に追加しましょう。  
-追加方法については割愛しますが、検索すれば出てくると思います。
+追加方法については割愛しますが、検索すれば出てくると思います。  
 公式ドキュメント: [https://api.slack.com/slash-commands](https://api.slack.com/slash-commands)  
 
 4. 完成！
