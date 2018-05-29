@@ -1,61 +1,61 @@
 //Project properties
 //SLACK_INCOMMING_URL: your slack incomming webhook's url
-
-function doPost(e){
+function doPost(e) {
   //<商品名>　<価格> <image url>
   var input = (e.parameter.text).split(" ");
-  sendMsgWithButton(input[0],input[1],input[2]);
-    
+  var reply_text = "";
+  if (input.length == 3) {
+    sendMsgWithButton(input[0], input[1], input[2], e.parameter.user_id);
+    reply_text = "商品の追加に成功いたしました"
+  } else if ((input.length == 4) && (input[3] == "master")) {
+    sendMsgWithButton(input[0], input[1], input[2], "master");
+    reply_text = "商品の追加に成功いたしました(master mode)"
+  } else {
+    reply_text = "何らかのエラーが発生しました"
+  }
   var res = {
-    "text": "商品を追加に成功いたしました."
+    "text": reply_text
   };
-  
   return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
 }
 
-function sendMsgWithButton(name,price,url) {
+function sendMsgWithButton(product_name, price, url, user_id) {
   // slack channel url (where to send the message)
   var slackUrl = PropertiesService.getScriptProperties().getProperty('SLACK_INCOMMING_URL');
-  
   // message text  
-      var messageData = {
-        "attachments": [
-          {
-            "title": name,
-            //"text":"在庫: "+num,
-            "fallback": "Sorry, no support for buttons.",
-            "callback_id": "ButtonResponse",
-            "color": "#3AA3E3",
-            "attachment_type": "default",
-            "actions": [
-              {
-                    "name": "buy",
-                    "text": price+"円",
-                    "type": "button",
-                    "value": price
-              }
-              /**キャンセルボタンなんていりませんよね？
-              ,{
-                    "name": "cancel",
-                    "text": "キャンセル",
-                    "type": "button",
-                    "value": price
-              }
-              **/
-            ],
-            "image_url": url
-          }
-        ]
-      }
-
-      // format for Slack
-      var options = {
-        'method' : 'post',
-        'contentType': 'application/json',
-        // Convert the JavaScript object to a JSON string.
-        'payload' : JSON.stringify(messageData)
-      };    
-
-      // post to Slack
-      UrlFetchApp.fetch(slackUrl, options);
-    }
+  var messageData = {
+    "attachments": [{
+      "title": product_name,
+      //"text":"在庫: "+num,
+      "fallback": "Sorry, no support for buttons.",
+      "callback_id": "ButtonResponse",
+      "color": "#3AA3E3",
+      "attachment_type": "default",
+      "actions": [{
+          "name": "buy",
+          "text": price + "円",
+          "type": "button",
+          "value": price + "," + user_id
+        }
+        /**キャンセルボタンなんていりませんよね？
+        ,{
+              "name": "cancel",
+              "text": "キャンセル",
+              "type": "button",
+              "value": price
+        }
+        **/
+      ],
+      "image_url": url
+    }]
+  }
+  // format for Slack
+  var options = {
+    'method': 'post',
+    'contentType': 'application/json',
+    // Convert the JavaScript object to a JSON string.
+    'payload': JSON.stringify(messageData)
+  };
+  // post to Slack
+  UrlFetchApp.fetch(slackUrl, options);
+}
