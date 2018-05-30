@@ -27,7 +27,7 @@ function sendMsgWithButton(product_name, price, url, user_id, user_name) {
   var messageData = {
     "attachments": [{
       "title": product_name,
-      "text":"by"+user_name,
+      "text":"by "+user_name,
       "fallback": "Sorry, no support for buttons.",
       "callback_id": "ButtonResponse",
       "color": "#3AA3E3",
