@@ -1,14 +1,15 @@
 //Project properties
 //SLACK_INCOMMING_URL: your slack incomming webhook's url
+
 function doPost(e) {
   //<商品名>　<価格> <image url>
   var input = (e.parameter.text).split(" ");
   var reply_text = "";
   if (input.length == 3) {
-    sendMsgWithButton(input[0], input[1], input[2], e.parameter.user_id);
+    sendMsgWithButton(input[0], input[1], input[2], e.parameter.user_id, e.parameter.user_name);
     reply_text = "商品の追加に成功いたしました"
   } else if ((input.length == 4) && (input[3] == "master")) {
-    sendMsgWithButton(input[0], input[1], input[2], "master");
+    sendMsgWithButton(input[0], input[1], input[2], "master", "master");
     reply_text = "商品の追加に成功いたしました(master mode)"
   } else {
     reply_text = "何らかのエラーが発生しました"
@@ -19,14 +20,14 @@ function doPost(e) {
   return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
 }
 
-function sendMsgWithButton(product_name, price, url, user_id) {
+function sendMsgWithButton(product_name, price, url, user_id, user_name) {
   // slack channel url (where to send the message)
   var slackUrl = PropertiesService.getScriptProperties().getProperty('SLACK_INCOMMING_URL');
   // message text  
   var messageData = {
     "attachments": [{
       "title": product_name,
-      //"text":"在庫: "+num,
+      "text":"by"+user_name,
       "fallback": "Sorry, no support for buttons.",
       "callback_id": "ButtonResponse",
       "color": "#3AA3E3",
