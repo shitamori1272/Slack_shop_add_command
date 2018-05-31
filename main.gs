@@ -60,3 +60,16 @@ function sendMsgWithButton(product_name, price, url, user_id, user_name) {
   // post to Slack
   UrlFetchApp.fetch(slackUrl, options);
 }
+
+//デバッグ用
+function doPostTest(){
+  var e = {
+    parameter: {
+      text: "Beer 100 http://beer.jpg",
+      user_id: "master_id",
+      user_name: "master_name"
+    }
+  }
+  
+  doPost(e);
+}
