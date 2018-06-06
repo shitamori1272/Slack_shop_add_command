@@ -1,5 +1,7 @@
 //Project properties
 //SLACK_INCOMMING_URL: your slack incomming webhook's url
+//PRODUCT_SHEET_ID: your product_sheet_id
+
 
 function doPost(e) {
   //<商品名>　<価格> <image url>
@@ -59,6 +61,9 @@ function sendMsgWithButton(product_name, price, url, user_id, user_name) {
   };
   // post to Slack
   UrlFetchApp.fetch(slackUrl, options);
+
+ //製品をスプレッドシートに登録する
+  registerProduct(product_name, 10,price, user_name);
 }
 
 //デバッグ用
@@ -73,3 +78,46 @@ function doPostTest(){
   
   doPost(e);
 }
+
+
+function registerUser(user_name,id){
+  /*
+  var moneySheetID = ;
+  var moneySheet = SpreadsheetApp.openby();
+  
+  get userid list from sheet
+  for list:
+  if not exist user_name in list:
+   add last row (username ...)
+  */
+}
+
+
+
+
+
+
+
+
+//製品をスプレッドシートに登録
+function registerProduct(productName, productCount, productPrice, registUser){
+  var productSheetID = PropertiesService.getScriptProperties().getProperty('PRODUCT_SHEET_ID');  
+  // マスタデータシートを取得
+  var productSheet = SpreadsheetApp.openById(productSheetID);　
+  //商品名	個数	価格	導入者	導入日	購入履歴
+  var productData = [productName,productCount,productPrice,registUser, new Date];
+  var length = productData.length;
+  productSheet.insertRowAfter(1);
+  //getRangeが引数をstring型のみという問題があり<=productsheetの型をsheetにすればOK
+  var targetRange = productSheet.getRange("A2");
+  for(var i=0;i<length;i++){
+    targetRange.offset(0, i).setValue(productData[i]);
+  }  
+}
+ 
+  
+
+
+
+
+
