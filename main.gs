@@ -4,24 +4,50 @@
 
 
 function doPost(e) {
-  //<商品名>　<価格> <image url>
-  var input = (e.parameter.text).split(" ");
-  var reply_text = "";
-  if (input.length == 3) {
-    sendMsgWithButton(input[0], input[1], input[2], e.parameter.user_id, e.parameter.user_name);
-    reply_text = "商品の追加に成功いたしました"
-  } else if ((input.length == 4) && (input[3] == "master")) {
-    sendMsgWithButton(input[0], input[1], input[2], "master", "master");
-    reply_text = "商品の追加に成功いたしました(master mode)"
-  } else {
-    reply_text = "何らかのエラーが発生しました"
+  
+  var command = e.parameter.command;
+  if(command == "/add_shop"){
+    
+    //<商品名>　<価格> <image url>
+    var input = (e.parameter.text).split(" ");
+    var reply_text = "";
+    if (input.length == 3) {
+      sendMsgWithButton(input[0], input[1], input[2], e.parameter.user_id, e.parameter.user_name);
+      reply_text = "商品の追加に成功いたしました"
+    } else if ((input.length == 4) && (input[3] == "master")) {
+      sendMsgWithButton(input[0], input[1], input[2], "master", "master");
+      reply_text = "商品の追加に成功いたしました(master mode)"
+    } else {
+      reply_text = "何らかのエラーが発生しました"
+    }
+    var res = {
+      "text": reply_text
+    };
+    return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+    
+  }else if(command == "/join_shop"){
+    var user_id = e.parameter.user_id;
+    var user_name = e.parametr.user_name;
+    var reply_text = ""
+    var result = registerUser(user_name,user_id);
+    if(result == true){
+      reply_text = "データベースにユーザを登録しました。";
+    }else{
+      reply_text = "データベースへの登録に失敗しました。すでに登録されている可能性があります。";
+    }
+    var res = {
+      "text":reply_text
+    };
+    return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);    
   }
-  var res = {
-    "text": reply_text
-  };
-  return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);
+
+  
+  
+  
 }
 
+  
+//shopチャンネルに商品を追加する
 function sendMsgWithButton(product_name, price, url, user_id, user_name) {
   // slack channel url (where to send the message)
   var slackUrl = PropertiesService.getScriptProperties().getProperty('SLACK_INCOMMING_URL');
@@ -80,20 +106,26 @@ function doPostTest(){
 }
 
 
-function registerUser(user_name,id){
+
+function registerUser(name,id){
+  var moneySheetID = PropertiesService.getScriptProperties().getProperty('MONEY_SHEET_ID');
+  var moneySheet = SpreadsheetApp.openById(moneySheetID).getSheets()[0];
+  var array = moneySheet.getDataRange().getValues();
   /*
-  var moneySheetID = ;
-  var moneySheet = SpreadsheetApp.openby();
-  
-  get userid list from sheet
-  for list:
-  if not exist user_name in list:
-   add last row (username ...)
+  111
+  111
+  111
+  111
+  の配列のサイズは(4,3)になる
   */
+  for(i=0;i<array.length;i++){
+    if(array[i][0] == id){
+      return false;
+    }
+  }
+  moneySheet.appendRow([id,0,name,"@"+name]);
+  return true;
 }
-
-
-
 
 
 
