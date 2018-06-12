@@ -128,9 +128,6 @@ function registerUser(name,id){
 }
 
 
-
-
-
 //製品をスプレッドシートに登録
 function registerProduct(productName, productCount, productPrice, registUser){
   var productSheetID = PropertiesService.getScriptProperties().getProperty('PRODUCT_SHEET_ID');  
@@ -146,6 +143,24 @@ function registerProduct(productName, productCount, productPrice, registUser){
     targetRange.offset(0, i).setValue(productData[i]);
   }  
 }
+
+
+
+//channelのすべてのメッセージを削除する
+function deleteMessage(channel_id ) {
+  var slack_access_token = PropertiesService.getScriptProperties().getProperty('SLACK_ACCESS_TOKEN');
+  var app = SlackApp.create(slack_access_token);
+  var messages = app.channelsHistory("CAX1W2T6Y")["messages"];
+  for(i=0;i<messages.length;i++){
+    var message = messages[i];
+    var ts = message["ts"];
+    var text = message["text"];
+    app.chatDelete("CAX1W2T6Y", ts);
+  }
+}
+
+
+
  
   
 
