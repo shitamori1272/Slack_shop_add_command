@@ -19,9 +19,8 @@ function doPost(e) {
       };
       return ContentService.createTextOutput(JSON.stringify(res)).setMimeType(ContentService.MimeType.JSON);    
     }
-    
   }else{
-    //ボタンの処理を書く。
+    //ボタンがおされた時の処理
     return buyMessage(e);
   } 
 }
@@ -82,6 +81,8 @@ function isSlashCommand(e){
   }
 }
 
+
+//postされたeがbuttonmessageかどうか判定する（未実装）
 function isButtonMessage(){  
 }
 
@@ -134,15 +135,7 @@ function sendMsgWithButton(product_name, count, price, url, user_id, user_name) 
 
 //デバッグ用
 function doPostTest(){
-  var e = {
-    parameter: {
-      text: "Beer 100 http://beer.jpg",
-      user_id: "master_id",
-      user_name: "master_name"
-    }
-  }
-  
-  doPost(e);
+  transpose(null);
 }
 
 
@@ -167,24 +160,7 @@ function registerUser(name,id){
   return true;
 }
 
-
-//製品をスプレッドシートに登録
-function registerProduct(productName, productCount, productPrice, url, registUser){
-  var productSheetID = PropertiesService.getScriptProperties().getProperty('PRODUCT_SHEET_ID');  
-  // マスタデータシートを取得
-  var productSheet = SpreadsheetApp.openById(productSheetID);　
-  //商品名	個数	価格　URL	導入者	導入日	
-  var productData = [productName,productCount,productPrice,url,registUser, new Date];
-  var length = productData.length;
-  productSheet.insertRowAfter(1);
-  //getRangeが引数をstring型のみという問題があり<=productsheetの型をsheetにすればOK
-  var targetRange = productSheet.getRange("A2");
-  for(var i=0;i<length;i++){
-    targetRange.offset(0, i).setValue(productData[i]);
-  }  
-}
-
-//未完成
+//productSheetに記載された全ての製品をSlack上に表示する
 function postAllProduct(){
   var productSheetID = PropertiesService.getScriptProperties().getProperty('PRODUCT_SHEET_ID');
   var moneySheetID = PropertiesService.getScriptProperties().getProperty('MONEY_SHEET_ID');
@@ -204,7 +180,7 @@ function postAllProduct(){
 }
 
 
-//channelのすべてのメッセージを削除する
+//shop_channelのすべてのメッセージを削除する
 function deleteMessage() {
   var channel_id = "CAX1W2T6Y";
   var slack_access_token = PropertiesService.getScriptProperties().getProperty('SLACK_ACCESS_TOKEN');
@@ -219,7 +195,7 @@ function deleteMessage() {
 }
 
 
-//Slackのshopのボタンが押された時の処理
+//Slackshopのボタンが押された時の処理
 function buyMessage(e){
   //exploit JSON from payload
   var parameter = e.parameter;
@@ -239,10 +215,15 @@ function buyMessage(e){
   var sheet_id = PropertiesService.getScriptProperties().getProperty('sheet_id');
   var userId = json.user.id;
   var userName = SlackShopAPI.getNameById(userId, sheet_id);
+  
+  //購入時の処理
   if(json.actions[0].name == "buy"){
     SlackShopAPI.subMoney(userId, product_price, slack_access_token, sheet_id);
+    var stock = reduceStock(name);
+    writeHistory(userName, userName, "buy", name, product_price, 0, userName);
     if(product_add_user != "master"){
       SlackShopAPI.addMoney(product_add_user, product_price, slack_access_token, sheet_id);
+      writeHistory(product_add_user, product_add_user, "sell", name, product_price, 0, userName);//最後の引数をuserName?変更した
     }
   }else if(json.actions[0].name == "cancel"){
     SlackShopAPI.addMoney(userId, price, slack_access_token, sheet_id);
@@ -252,7 +233,7 @@ function buyMessage(e){
     "response_type": "in_channel",
     "attachments": [{
       "title": name,
-      "text": "by "+SlackShopAPI.getNameById(product_add_user, sheet_id),
+      "text": "by "+SlackShopAPI.getNameById(product_add_user, sheet_id)+"\n在庫数："+stock,
       "fallback": "Sorry, no support for buttons.",
       "callback_id": "ButtonResponse",
       "color": "#3AA3E3",
@@ -262,16 +243,16 @@ function buyMessage(e){
       "text": product_price+"円",
       "type": "button",
       "value": product_price+","+product_add_user
-    }/**キャンセルボタンを削除
-    ,{
-    "name": "cancel",
-    "text": "注文をキャンセル",
-    "type": "button",
-    "value": price
-    }**/           ],
+      }/**キャンセルボタンを削除
+      ,{
+      "name": "cancel",
+      "text": "注文をキャンセル",
+      "type": "button",
+      "value": price
+      }**/           ],
     "image_url":image_url
-  }]
-};
+    }]
+  };
 return ContentService.createTextOutput(JSON.stringify(replyMessage)).setMimeType(ContentService.MimeType.JSON);
 }
 
